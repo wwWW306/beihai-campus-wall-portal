@@ -347,24 +347,15 @@ onUnmounted(() => {
   transition: background-color 0.5s ease, color 0.5s ease;
 }
 
-/* 白天模式覆盖 */
+/* 白天模式覆盖 (调成偏黄暖调) */
 :deep([data-theme="light"]) .editorial-landing,
 .editorial-landing.theme-light {
-  --bg-color: #F5F2EB; /* 恢复原来的米白色 */
+  --bg-color: #FCF5E1; 
   --text-color: #0D0D0D;
   --accent-color: #FF3333;
   --border-color: rgba(0, 0, 0, 0.1);
   --btn-bg: #0D0D0D;
-  --btn-text: #F5F2EB;
-}
-
-/* 如果 App.vue 已经设置了 data-theme，我们可以直接通过 store 状态控制 */
-.theme-light {
-  --bg-color: #F5F2EB;
-  --text-color: #0D0D0D;
-  --border-color: rgba(0, 0, 0, 0.1);
-  --btn-bg: #0D0D0D;
-  --btn-text: #F5F2EB;
+  --btn-text: #FCF5E1;
 }
 
 .mt-2 { margin-top: 8px; }
@@ -575,7 +566,7 @@ onUnmounted(() => {
 .elegant-modal-wrapper { position: fixed; inset: 0; z-index: 99999; background: rgba(13, 13, 13, 0.95); backdrop-filter: blur(12px); display: flex; justify-content: center; align-items: center; }
 .elegant-modal { width: 90vw; max-width: 500px; padding: 40px; position: relative; }
 .elegant-modal-enter-active .elegant-modal { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-.elegant-modal-leave-active .elegant-modal { animation: fadeSlideDown 0.4s ease-in forwards; }
+.elegant-modal-leave-active .editorial-landing { animation: fadeSlideDown 0.4s ease-in forwards; }
 @keyframes fadeSlideDown { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(20px); opacity: 0; } }
 .close-btn { position: absolute; top: -20px; right: 0; background: transparent; color: #F5F2EB; border: none; padding: 10px; font-family: 'Space Mono', monospace; font-size: 14px; cursor: pointer; transition: opacity 0.3s; }
 .close-btn:hover { opacity: 0.5; color: #FF3333; }
