@@ -1,648 +1,325 @@
 <template>
-  <div class="wall-layout">
-    <div class="container">
-      <div class="wall-grid">
+  <div class="wall-page">
+    <!-- 顶部导航栏 -->
+    <header class="wall-topbar">
+      <router-link to="/wall" class="topbar-logo">
+        <Icons name="fire" :size="22" />
+        <span>Campus Wall</span>
+      </router-link>
 
-        <!-- 左侧边栏 -->
-        <aside class="sidebar-left">
-          <!-- 发起帖 -->
-          <div v-if="isLoggedIn" class="composer-card card">
-            <div class="composer-inner" @click="goCreate">
-              <img :src="currentUser.avatar" class="avatar" :alt="currentUser.name" />
-              <span class="composer-placeholder">分享你在校园的所见所闻...</span>
-            </div>
-            <div class="composer-actions">
-              <button class="composer-action">
-                <Icons name="image" :size="17" />
-                <span>图片</span>
-              </button>
-              <button class="composer-action">
-                <Icons name="partition" :size="17" />
-                <span>分区</span>
-              </button>
-              <button class="btn btn-primary btn-xs" @click="goCreate">发布</button>
-            </div>
-          </div>
-
-          <!-- 功能导航 -->
-          <div class="nav-card card">
-            <router-link to="/" class="side-nav-item side-nav-item--active">
-              <Icons name="fire" :size="18" />
-              <span>热门</span>
-            </router-link>
-            <a href="#" class="side-nav-item">
-              <Icons name="clock" :size="18" />
-              <span>最新</span>
-            </a>
-            <a href="#" class="side-nav-item">
-              <Icons name="star" :size="18" />
-              <span>关注</span>
-            </a>
-          </div>
-
-          <!-- 分区列表 -->
-          <div class="partition-card card">
-            <div class="card-header">
-              <span class="card-title">热门分区</span>
-              <router-link to="/partitions" class="card-more">查看全部</router-link>
-            </div>
-            <div class="partition-list">
-              <router-link
-                v-for="p in partitions"
-                :key="p.id"
-                :to="`/partitions/${p.id}`"
-                class="partition-item"
-              >
-                <span class="partition-icon" :style="{ background: p.color + '15', color: p.color }">
-                  {{ p.icon }}
-                </span>
-                <div class="partition-info">
-                  <span class="partition-name">{{ p.name }}</span>
-                  <span class="partition-count">{{ p.count }} 帖</span>
-                </div>
-              </router-link>
-            </div>
-          </div>
-        </aside>
-
-        <!-- 中间 Feed -->
-        <main class="feed">
-          <!-- Feed 头部 -->
-          <div class="feed-header">
-            <div class="feed-tabs">
-              <button
-                v-for="tab in tabs"
-                :key="tab.key"
-                class="feed-tab"
-                :class="{ 'feed-tab--active': activeTab === tab.key }"
-                @click="activeTab = tab.key"
-              >{{ tab.label }}</button>
-            </div>
-          </div>
-
-          <!-- 加载骨架屏 -->
-          <div v-if="loading" class="post-list">
-            <div v-for="i in 3" :key="i" class="skeleton-card card">
-              <div class="skeleton-header">
-                <div class="skeleton avatar-skel"></div>
-                <div class="skeleton-text"></div>
-              </div>
-              <div class="skeleton-body">
-                <div class="skeleton skeleton-line"></div>
-                <div class="skeleton skeleton-line short"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 帖子列表 -->
-          <div v-else class="post-list">
-            <PostCard
-              v-for="post in displayedPosts"
-              :key="post.id"
-              :post="post"
-              @like="toggleLike"
-            />
-            <div v-if="displayedPosts.length === 0" class="empty-state">
-              <Icons name="edit" :size="40" />
-              <p>还没有帖子，快来发表第一篇吧！</p>
-              <router-link to="/create" class="btn btn-primary" style="margin-top:12px">发布帖子</router-link>
-            </div>
-          </div>
-
-          <!-- 加载更多 -->
-          <div v-if="hasMore && !loading" class="load-more">
-            <button class="btn btn-secondary" @click="loadMore">加载更多</button>
-          </div>
-        </main>
-
-        <!-- 右侧边栏 -->
-        <aside class="sidebar-right">
-          <!-- 热搜 -->
-          <div class="hot-card card">
-            <div class="card-header">
-              <Icons name="trending" :size="18" />
-              <span class="card-title">实时热搜</span>
-            </div>
-            <div class="hot-list">
-              <a
-                v-for="(item, idx) in hotSearch"
-                :key="idx"
-                href="#"
-                class="hot-item"
-              >
-                <span class="hot-rank" :class="{ 'hot-rank--top': idx < 3 }">{{ idx + 1 }}</span>
-                <div class="hot-info">
-                  <span class="hot-title">{{ item.title }}</span>
-                  <span class="hot-count">{{ item.count }}</span>
-                </div>
-              </a>
-            </div>
-          </div>
-
-          <!-- 推荐用户 -->
-          <div class="card">
-            <div class="card-header">
-              <Icons name="users" :size="18" />
-              <span class="card-title">推荐关注</span>
-            </div>
-            <div class="user-list">
-              <div v-for="u in recommendedUsers" :key="u.id" class="user-item">
-                <router-link :to="`/user/${u.id}`" class="user-item-info">
-                  <img :src="u.avatar" class="avatar avatar-sm" :alt="u.name" />
-                  <div>
-                    <div class="user-name">{{ u.name }}</div>
-                    <div class="user-bio">{{ u.bio }}</div>
-                  </div>
-                </router-link>
-                <button class="btn btn-secondary btn-xs">关注</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- 页脚 -->
-          <div class="sidebar-footer">
-            <div class="footer-links">
-              <a href="#">关于</a>
-              <a href="#">隐私</a>
-              <a href="#">用户公约</a>
-            </div>
-            <p class="footer-copy">© 2026 Campus Wall</p>
-          </div>
-        </aside>
-
+      <!-- 热门最新关注 Tab -->
+      <div class="topbar-tabs">
+        <button v-for="tab in tabs" :key="tab.key" class="topbar-tab" :class="{ 'topbar-tab--active': activeTab === tab.key }" @click="setTab(tab.key)">
+          <Icons :name="tab.icon" :size="16" />
+          <span>{{ tab.label }}</span>
+        </button>
       </div>
+
+      <div class="topbar-right">
+        <div class="search-box">
+          <Icons name="search" :size="16" />
+          <input type="text" placeholder="搜索校园内容..." class="search-input" />
+        </div>
+        <router-link to="/login" class="topbar-btn">登录</router-link>
+        <router-link to="/register" class="topbar-btn topbar-btn-primary">注册</router-link>
+      </div>
+    </header>
+
+    <!-- 分区导航 -->
+    <div class="partition-bar">
+      <router-link to="/partitions" class="partition-item">
+        <Icons name="partition" :size="14" />
+        <span>全部分区</span>
+      </router-link>
+      <router-link v-for="p in partitions" :key="p.id" :to="`/partitions/${p.id}`" class="partition-item">
+        <Icons :name="p.icon" :size="14" />
+        <span>{{ p.name }}</span>
+      </router-link>
+    </div>
+
+    <div class="wall-layout">
+      <!-- 左侧导航栏 -->
+      <aside class="wall-sidebar-left" :style="{ width: leftWidth + 'px' }">
+        <nav class="sidebar-nav">
+          <router-link to="/wall" class="sidebar-link">
+            <Icons name="home" :size="20" /><span>首页</span>
+          </router-link>
+          <router-link to="/partitions" class="sidebar-link">
+            <Icons name="partition" :size="20" /><span>分区</span>
+          </router-link>
+          <router-link to="/search" class="sidebar-link">
+            <Icons name="search" :size="20" /><span>搜索</span>
+          </router-link>
+          <router-link to="/notifications" class="sidebar-link">
+            <Icons name="bell" :size="20" /><span>通知</span>
+          </router-link>
+          <router-link to="/messages" class="sidebar-link">
+            <Icons name="chat" :size="20" /><span>私信</span>
+          </router-link>
+          <router-link to="/bookmarks" class="sidebar-link">
+            <Icons name="bookmark" :size="20" /><span>书签</span>
+          </router-link>
+          <router-link to="/profile" class="sidebar-link">
+            <Icons name="user" :size="20" /><span>个人主页</span>
+          </router-link>
+        </nav>
+
+        <button class="sidebar-post-btn" @click="goCreate">
+          <Icons name="edit" :size="18" /><span>发帖子</span>
+        </button>
+      </aside>
+
+      <!-- 拖拽调整左侧宽度 -->
+      <div class="resize-handle" @mousedown="startResize('left', $event)"></div>
+
+      <!-- 中间内容区 -->
+      <main class="wall-main">
+        <div v-if="loading" class="loading-state">
+          <div class="spinner"></div>
+          <p>加载中...</p>
+        </div>
+        <div v-else class="feed-list">
+          <PostCard v-for="post in displayPosts" :key="post.id" :post="post" />
+          <div v-if="displayPosts.length === 0" class="empty-state">
+            <Icons name="edit" :size="40" />
+            <p>这里还是空的，快来留下第一个脚印吧</p>
+          </div>
+        </div>
+      </main>
+
+      <!-- 拖拽调整右侧宽度 -->
+      <div class="resize-handle" @mousedown="startResize('right', $event)"></div>
+
+      <!-- 右侧边栏 -->
+      <aside class="wall-sidebar-right" :style="{ width: rightWidth + 'px' }">
+        <ThemeBanner />
+        <div class="sidebar-card">
+          <h3 class="sidebar-title"><Icons name="partition" :size="16" /> 分区</h3>
+          <div class="partition-grid">
+            <router-link v-for="p in partitions" :key="p.id" :to="`/partitions/${p.id}`" class="p-grid-item">
+              <Icons :name="p.icon" :size="16" /><span>{{ p.name }}</span>
+            </router-link>
+          </div>
+        </div>
+        <div class="sidebar-card">
+          <h3 class="sidebar-title"><Icons name="trending" :size="16" /> 热搜榜</h3>
+          <div class="hot-list">
+            <a v-for="(item, idx) in hotSearch" :key="idx" href="#" class="hot-item">
+              <span class="hot-rank" :class="{ 'hot-rank--top': idx < 3 }">{{ idx + 1 }}</span>
+              <span class="hot-title">{{ item.title }}</span>
+            </a>
+          </div>
+        </div>
+        <div class="sidebar-card">
+          <h3 class="sidebar-title"><Icons name="users" :size="16" /> 推荐关注</h3>
+          <div class="recommend-list">
+            <div v-for="u in recommendedUsers" :key="u.id" class="recommend-item">
+              <img :src="u.avatar" class="avatar-sm" :alt="u.name" />
+              <div class="recommend-info">
+                <span class="recommend-name">{{ u.name }}</span>
+                <span class="recommend-desc">{{ u.desc }}</span>
+              </div>
+              <button class="btn btn-sm btn-secondary">关注</button>
+            </div>
+          </div>
+        </div>
+      </aside>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { usePostsStore } from '../stores'
 import Icons from '../components/Icons.vue'
 import PostCard from '../components/PostCard.vue'
+import ThemeBanner from '../components/ThemeBanner.vue'
 
 const router = useRouter()
-const loading = ref(false)
+const postsStore = usePostsStore()
+const loading = ref(true)
 const activeTab = ref('hot')
-const page = ref(1)
-const isLoggedIn = ref(true)
-const currentUser = ref({ name: '当前用户', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix' })
+const displayPosts = ref([])
+
+const leftWidth = ref(240)
+const rightWidth = ref(300)
+let resizing = null
+let startX = 0
+let startLeftWidth = 0
+let startRightWidth = 0
 
 const tabs = [
-  { key: 'hot', label: '🔥 热门' },
-  { key: 'new', label: '🕐 最新' },
-  { key: 'follow', label: '⭐ 关注' },
+  { key: 'hot', label: '热门', icon: 'fire' },
+  { key: 'new', label: '最新', icon: 'clock' },
+  { key: 'follow', label: '关注', icon: 'star' },
 ]
 
-const partitions = ref([
-  { id: 1, name: '校园生活', icon: '🏫', count: 2341, color: '#f97316' },
-  { id: 2, name: '学习交流', icon: '📚', count: 1892, color: '#3b82f6' },
-  { id: 3, name: '二手交易', icon: '💰', count: 876, color: '#10b981' },
-  { id: 4, name: '美食探店', icon: '🍜', count: 654, color: '#ef4444' },
-  { id: 5, name: '情感树洞', icon: '💬', count: 1203, color: '#8b5cf6' },
-])
+const partitions = [
+  { id: 1, name: '校园日常', icon: 'image' },
+  { id: 2, name: '学习互助', icon: 'book' },
+  { id: 3, name: '跳蚤市场', icon: 'tag' },
+  { id: 4, name: '干饭时刻', icon: 'heart' },
+  { id: 5, name: '树洞心声', icon: 'chat' },
+  { id: 6, name: '求职上岸', icon: 'fire' },
+  { id: 7, name: '表白交友', icon: 'heart' },
+  { id: 8, name: '失物招领', icon: 'search' },
+  { id: 9, name: '拼车组队', icon: 'users' },
+  { id: 10, name: '资源共享', icon: 'link' },
+]
 
-const hotSearch = ref([
-  { title: '#大学生期末复习#', count: '52.3万' },
-  { title: '图书馆新规惹争议', count: '28.7万' },
-  { title: '食堂新出网红菜', count: '15.2万' },
-  { title: '暑期实习求内推', count: '9.8万' },
-  { title: '校园演唱会抢票', count: '6.4万' },
-  { title: '考研还是就业', count: '4.1万' },
-])
+const hotSearch = [
+  { title: '#大学生期末复习#' },
+  { title: '图书馆新规惹争议' },
+  { title: '食堂新出网红菜' },
+  { title: '暑期实习求内推' },
+  { title: '校园演唱会抢票' },
+  { title: '考研还是就业' },
+]
 
-const recommendedUsers = ref([
-  { id: 1, name: '校园君', bio: '校园资讯第一发布平台', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=School' },
-  { id: 2, name: '表白墙', bio: '帮你说出心里话', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Love' },
-  { id: 3, name: '二手菌', bio: '专注校园二手交易', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Used' },
-])
+const recommendedUsers = [
+  { id: 1, name: '校园新闻社', desc: '最新校园资讯', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=News' },
+  { id: 2, name: '表白墙菌', desc: '传递爱与温暖', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Confess' },
+  { id: 3, name: '二手市场', desc: '便宜好货等你来', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Market' },
+]
 
-const displayedPosts = ref([])
-const hasMore = ref(true)
+function setTab(key) {
+  activeTab.value = key
+  loadInitial()
+}
 
-async function fetchPosts() {
+function startResize(side, e) {
+  resizing = side
+  startX = e.clientX
+  startLeftWidth = leftWidth.value
+  startRightWidth = rightWidth.value
+  document.addEventListener('mousemove', doResize)
+  document.addEventListener('mouseup', stopResize)
+}
+
+function doResize(e) {
+  if (!resizing) return
+  const diff = e.clientX - startX
+  if (resizing === 'left') {
+    leftWidth.value = Math.max(180, Math.min(350, startLeftWidth + diff))
+  } else {
+    rightWidth.value = Math.max(220, Math.min(420, startRightWidth - diff))
+  }
+}
+
+function stopResize() {
+  resizing = null
+  document.removeEventListener('mousemove', doResize)
+  document.removeEventListener('mouseup', stopResize)
+}
+
+async function loadInitial() {
   loading.value = true
-  await new Promise(r => setTimeout(r, 800))
-  displayedPosts.value = [
-    {
-      id: 1,
-      content: '图书馆终于开了空调，期末复习的同学们冲啊！📚 建议大家提前预约座位，避免高峰期排队~',
-      authorName: '小明同学',
-      authorAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex',
-      authorId: 1,
-      createTime: Date.now() - 1800000,
-      likeCount: 342,
-      commentCount: 56,
-      isLiked: false,
-      partition: '校园生活',
-      images: []
-    },
-    {
-      id: 2,
-      content: '食堂新出的红烧肉拌饭绝了！窗口在二楼第三个档口，💰 12元一份，分量超足。',
-      authorName: '美食侦探',
-      authorAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Foodie',
-      authorId: 2,
-      createTime: Date.now() - 7200000,
-      likeCount: 567,
-      commentCount: 89,
-      isLiked: true,
-      partition: '美食探店',
-      images: [
-        'https://picsum.photos/seed/food1/800/600',
-        'https://picsum.photos/seed/food2/800/600',
-        'https://picsum.photos/seed/food3/800/600',
-      ]
-    },
-    {
-      id: 3,
-      content: '求一台二手笔记本，预算2000以内，用于写代码和看网课。有出的同学麻烦私信我🙏',
-      authorName: '码农预备役',
-      authorAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Code',
-      authorId: 3,
-      createTime: Date.now() - 14400000,
-      likeCount: 23,
-      commentCount: 8,
-      isLiked: false,
-      partition: '二手交易',
-      images: []
-    },
-    {
-      id: 4,
-      content: '又到期末周了，感觉自己一周学完了一学期的课 😅 有没有大佬分享一下高效复习方法？',
-      authorName: '焦虑大三狗',
-      authorAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Stressed',
-      authorId: 4,
-      createTime: Date.now() - 28800000,
-      likeCount: 1205,
-      commentCount: 234,
-      isLiked: false,
-      partition: '学习交流',
-      images: []
-    },
-    {
-      id: 5,
-      content: '校园表白墙代发，帮你说出那些不好意思当面说的话。支持匿名，私信必回。',
-      authorName: '表白墙菌',
-      authorAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Confess',
-      authorId: 5,
-      createTime: Date.now() - 43200000,
-      likeCount: 89,
-      commentCount: 45,
-      isLiked: false,
-      partition: '情感树洞',
-      images: []
-    },
-  ]
+  try {
+    const result = await postsStore.fetchPosts(1, 8, null, activeTab.value)
+    displayPosts.value = result.data || []
+  } catch (err) {
+    console.error('加载失败', err)
+    displayPosts.value = []
+  }
   loading.value = false
 }
 
-function toggleLike(id) {
-  const post = displayedPosts.value.find(p => p.id === id)
-  if (post) {
-    post.isLiked = !post.isLiked
-    post.likeCount += post.isLiked ? 1 : -1
-  }
+function goCreate() {
+  router.push('/post/new')
 }
 
-function loadMore() {
-  // 实际项目这里加载更多
-  hasMore.value = false
-}
-
-function goCreate() { router.push('/create') }
-
-fetchPosts()
+onMounted(() => {
+  loadInitial()
+})
 </script>
 
 <style scoped>
-.wall-layout {
-  min-height: calc(100vh - 56px);
-  padding: 20px 0 40px;
-}
+.wall-page { min-height: 100vh; display: flex; flex-direction: column; }
 
-.wall-grid {
-  display: grid;
-  grid-template-columns: 260px 1fr 280px;
-  gap: 20px;
-  align-items: start;
-}
-
-/* 左侧栏 */
-.sidebar-left {
+/* 顶部导航栏 */
+.wall-topbar {
   position: sticky;
-  top: 76px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.composer-card { padding: 14px; }
-.composer-inner {
+  top: 0;
+  z-index: 100;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px;
-  background: var(--color-bg);
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  transition: background var(--transition-fast);
+  gap: 16px;
+  padding: 10px 20px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border);
 }
-.composer-inner:hover { background: var(--color-border-light); }
-.composer-placeholder {
-  font-size: 14px;
-  color: var(--color-text-muted);
-}
-.composer-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid var(--color-border-light);
-}
-.composer-action {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 5px 10px;
-  border-radius: var(--radius-full);
-  font-size: 12px;
-  color: var(--color-text-secondary);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-.composer-action:hover { background: var(--color-bg); color: var(--color-primary); }
-.btn-xs { padding: 4px 10px; font-size: 12px; }
+.topbar-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--color-text); font-size: 18px; font-weight: 700; white-space: nowrap; }
+.topbar-tabs { display: flex; gap: 4px; flex: 1; justify-content: center; }
+.topbar-tab { display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; color: var(--color-text-secondary); background: transparent; border: none; cursor: pointer; transition: all var(--transition-fast); font-family: var(--font-sans); }
+.topbar-tab:hover { background: var(--color-surface-alt); }
+.topbar-tab--active { background: var(--color-primary); color: var(--color-bg); }
+.topbar-right { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.search-box { display: flex; align-items: center; gap: 8px; background: var(--color-surface-alt); border: 1px solid var(--color-border); border-radius: 20px; padding: 8px 14px; }
+.search-input { background: transparent; border: none; outline: none; font-size: 14px; color: var(--color-text); font-family: var(--font-sans); width: 160px; }
+.topbar-btn { padding: 8px 14px; border-radius: 16px; font-size: 13px; font-weight: 600; text-decoration: none; color: var(--color-text); background: var(--color-surface-alt); border: 1px solid var(--color-border); }
+.topbar-btn:hover { background: var(--color-surface); }
+.topbar-btn-primary { background: var(--color-primary); color: var(--color-bg); border-color: var(--color-primary); }
 
-.nav-card { padding: 8px; }
-.side-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  text-decoration: none;
-  transition: all var(--transition-fast);
-}
-.side-nav-item:hover { background: var(--color-bg); color: var(--color-text); }
-.side-nav-item--active { background: var(--color-primary-light); color: var(--color-primary); }
+/* 分区导航 */
+.partition-bar { display: flex; gap: 4px; padding: 8px 20px; overflow-x: auto; background: var(--color-surface); border-bottom: 1px solid var(--color-border); }
+.partition-bar::-webkit-scrollbar { display: none; }
+.partition-item { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 14px; font-size: 13px; font-weight: 500; color: var(--color-text-secondary); text-decoration: none; white-space: nowrap; transition: all var(--transition-fast); }
+.partition-item:hover { background: var(--color-surface-alt); color: var(--color-text); }
+.partition-item.router-link-active { background: var(--color-primary-light); color: var(--color-primary); }
 
-.partition-card { padding: 14px; }
-.card-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-.card-title { font-size: 14px; font-weight: 600; color: var(--color-text); }
-.card-more { font-size: 12px; color: var(--color-accent); margin-left: auto; text-decoration: none; }
-.card-more:hover { text-decoration: underline; }
+/* 三栏布局 */
+.wall-layout { display: flex; flex: 1; overflow: hidden; }
 
-.partition-list { display: flex; flex-direction: column; gap: 2px; }
-.partition-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 7px 8px;
-  border-radius: var(--radius-md);
-  text-decoration: none;
-  transition: background var(--transition-fast);
-}
-.partition-item:hover { background: var(--color-bg); }
-.partition-icon {
-  width: 30px;
-  height: 30px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  flex-shrink: 0;
-}
-.partition-info { display: flex; flex-direction: column; }
-.partition-name { font-size: 13px; font-weight: 500; color: var(--color-text); }
-.partition-count { font-size: 11px; color: var(--color-text-muted); }
+/* 左侧导航栏 */
+.wall-sidebar-left { width: 240px; flex-shrink: 0; display: flex; flex-direction: column; padding: 12px; border-right: 1px solid var(--color-border); overflow-y: auto; gap: 4px; }
+.sidebar-nav { display: flex; flex-direction: column; gap: 2px; }
+.sidebar-link { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 24px; font-size: 14px; font-weight: 500; color: var(--color-text); text-decoration: none; transition: all var(--transition-fast); }
+.sidebar-link:hover { background: var(--color-surface-alt); }
+.sidebar-link.router-link-active { background: var(--color-primary-light); color: var(--color-primary); font-weight: 600; }
+.sidebar-post-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 11px; background: var(--color-primary); color: var(--color-bg); border: none; border-radius: 24px; font-size: 14px; font-weight: 600; font-family: var(--font-sans); cursor: pointer; margin-top: auto; }
 
-/* 中间 Feed */
-.feed-header { margin-bottom: 16px; }
-.feed-tabs {
-  display: flex;
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
-  border: 1px solid var(--color-border-light);
-  padding: 4px;
-  gap: 4px;
-}
-.feed-tab {
-  flex: 1;
-  padding: 8px 16px;
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-.feed-tab:hover { color: var(--color-text); }
-.feed-tab--active {
-  background: var(--color-primary);
-  color: white;
-}
+/* 拖拽调整宽度 */
+.resize-handle { width: 5px; cursor: col-resize; background: transparent; flex-shrink: 0; transition: background 0.2s; }
+.resize-handle:hover { background: var(--color-primary); opacity: 0.5; }
 
-.post-list { display: flex; flex-direction: column; gap: 12px; }
+/* 中间内容区 */
+.wall-main { flex: 1; min-width: 0; overflow-y: auto; padding: 0 16px; }
+.loading-state { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 60px 0; color: var(--color-text-muted); }
+.spinner { width: 28px; height: 28px; border: 3px solid var(--color-border); border-top-color: var(--color-primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.feed-list { display: flex; flex-direction: column; gap: 12px; padding: 16px 0; }
+.empty-state { display: flex; flex-direction: column; align-items: center; gap: 12px; color: var(--color-text-muted); padding: 60px 0; }
 
-/* 骨架屏 */
-.skeleton-card { padding: 16px; }
-.skeleton-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.avatar-skel { width: 36px; height: 36px; border-radius: var(--radius-full); }
-.skeleton-text { flex: 1; height: 14px; border-radius: var(--radius-sm); }
-.skeleton-body { display: flex; flex-direction: column; gap: 8px; }
-.skeleton-line { height: 14px; border-radius: var(--radius-sm); }
-.skeleton-line.short { width: 65%; }
-
-.load-more { text-align: center; padding: 20px; }
-
-/* 右侧栏 */
-.sidebar-right {
-  position: sticky;
-  top: 76px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.hot-card { padding: 14px; }
-.hot-list { display: flex; flex-direction: column; gap: 2px; }
-.hot-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 7px 4px;
-  border-radius: var(--radius-md);
-  text-decoration: none;
-  transition: background var(--transition-fast);
-}
-.hot-item:hover { background: var(--color-bg); }
-.hot-rank {
-  width: 18px;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--color-text-muted);
-  text-align: center;
-  flex-shrink: 0;
-}
+/* 右侧边栏 */
+.wall-sidebar-right { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; padding: 12px; overflow-y: auto; border-left: 1px solid var(--color-border); }
+.sidebar-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 14px; }
+.sidebar-title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: var(--color-text); margin-bottom: 12px; }
+.partition-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+.p-grid-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--color-surface-alt); border-radius: 10px; text-decoration: none; font-size: 13px; color: var(--color-text); transition: all var(--transition-fast); }
+.p-grid-item:hover { background: var(--color-primary-light); color: var(--color-primary); }
+.hot-list { display: flex; flex-direction: column; }
+.hot-item { display: flex; align-items: center; gap: 10px; padding: 8px 6px; border-radius: 6px; text-decoration: none; transition: background var(--transition-fast); }
+.hot-item:hover { background: var(--color-surface-alt); }
+.hot-rank { width: 20px; font-size: 13px; font-weight: 700; color: var(--color-text-muted); text-align: center; }
 .hot-rank--top { color: var(--color-primary); }
-.hot-info { display: flex; flex-direction: column; min-width: 0; }
-.hot-title {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.hot-count { font-size: 11px; color: var(--color-text-muted); }
+.hot-title { font-size: 13px; font-weight: 500; color: var(--color-text); }
+.recommend-list { display: flex; flex-direction: column; gap: 10px; }
+.recommend-item { display: flex; align-items: center; gap: 10px; }
+.recommend-info { flex: 1; min-width: 0; }
+.recommend-name { display: block; font-size: 13px; font-weight: 600; color: var(--color-text); }
+.recommend-desc { display: block; font-size: 11px; color: var(--color-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.user-list { display: flex; flex-direction: column; gap: 2px; }
-.user-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 4px;
-}
-.user-item-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  min-width: 0;
-  text-decoration: none;
-}
-.user-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text);
-}
-.user-bio {
-  font-size: 11px;
-  color: var(--color-text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+/* 按钮 */
+.btn { padding: 5px 10px; font-size: 12px; font-weight: 600; border-radius: 14px; cursor: pointer; transition: all var(--transition-fast); border: none; font-family: var(--font-sans); }
+.btn-secondary { background: var(--color-text); color: var(--color-bg); }
 
-.sidebar-footer {
-  padding: 8px 4px;
-}
-.footer-links {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 6px;
-}
-.footer-links a {
-  font-size: 12px;
-  color: var(--color-text-muted);
-  text-decoration: none;
-}
-.footer-links a:hover { color: var(--color-text-secondary); }
-.footer-copy {
-  font-size: 11px;
-  color: var(--color-text-muted);
-}
+/* 头像 */
+.avatar-sm { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
 
-/* 响应式 - 平板 */
-@media (max-width: 1024px) {
-  .wall-grid { grid-template-columns: 220px 1fr; }
-  .sidebar-right { display: none; }
-}
-
-/* 响应式 - 手机 */
-@media (max-width: 768px) {
-  .wall-layout {
-    padding: 0;
-    min-height: 100vh;
-  }
-
-  /* 全屏简洁 Feed */
-  .wall-grid {
-    grid-template-columns: 1fr;
-  }
-  .sidebar-left { display: none; }
-  .sidebar-right { display: none; }
-
-  /* 手机端 Feed 样式 */
-  .feed {
-    padding: 0;
-  }
-
-  .feed-header {
-    position: sticky;
-    top: 56px;
-    z-index: 50;
-    background: rgba(255,255,255,0.95);
-    backdrop-filter: blur(8px);
-    padding: 8px 0;
-    margin-bottom: 0;
-    border-bottom: 1px solid var(--color-border-light);
-  }
-
-  .feed-tabs {
-    border-radius: 0;
-    box-shadow: none;
-    border: none;
-    background: transparent;
-    padding: 0 12px;
-  }
-
-  .feed-tab {
-    font-size: 13px;
-    padding: 6px 12px;
-  }
-
-  /* 全屏帖子卡片 */
-  .post-list {
-    gap: 0;
-    padding: 0;
-  }
-
-  /* 骨架屏 */
-  .skeleton-card {
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-  }
-
-  /* 加载更多 */
-  .load-more {
-    padding: 16px 12px;
-  }
-}
-
-/* 手机端帖子卡片无阴影全宽 */
-@media (max-width: 768px) {
-  :deep(.post-card) {
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-    box-shadow: none;
-    border-bottom: 1px solid var(--color-border-light);
-    padding: 14px 16px;
-  }
-
-  :deep(.post-card:hover) {
-    box-shadow: none;
-    transform: none;
-    background: var(--color-surface);
-  }
-}
+/* 响应式 */
+@media (max-width: 1100px) { .wall-sidebar-left { width: 200px !important; } .wall-sidebar-right { width: 260px !important; } }
+@media (max-width: 900px) { .wall-sidebar-left { width: 64px !important; } .sidebar-nav span, .sidebar-post-btn span { display: none; } .sidebar-link { justify-content: center; padding: 12px; } .sidebar-post-btn { padding: 12px; } .wall-sidebar-right { width: 240px !important; } .search-box .search-input { display: none; } }
+@media (max-width: 768px) { .wall-sidebar-left, .wall-sidebar-right, .resize-handle { display: none; } .wall-main { min-height: calc(100vh - 120px); } .topbar-tabs { display: none; } }
 </style>

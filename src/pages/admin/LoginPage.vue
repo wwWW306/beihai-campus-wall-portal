@@ -96,13 +96,15 @@ async function handleLogin() {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: linear-gradient(135deg, #fff7ed 0%, #eff6ff 50%, #f5f3ff 100%);
+  background: var(--color-bg);
 }
 
 .login-card {
   width: 100%;
   max-width: 400px;
   padding: 36px 32px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
 }
 
 .login-logo {
@@ -121,10 +123,15 @@ async function handleLogin() {
   align-items: center;
   justify-content: center;
 }
+.logo-icon svg path {
+  fill: var(--color-bg) !important;
+  stroke: var(--color-bg) !important;
+}
 .logo-text {
   font-size: 18px;
   font-weight: 700;
   color: var(--color-text);
+  font-family: 'Bebas Neue', sans-serif;
 }
 
 .login-title {
@@ -174,10 +181,10 @@ async function handleLogin() {
 }
 .forgot-link {
   font-size: 13px;
-  color: var(--color-accent);
+  color: var(--color-text-secondary);
   text-decoration: none;
 }
-.forgot-link:hover { text-decoration: underline; }
+.forgot-link:hover { text-decoration: underline; color: var(--color-text); }
 
 .login-btn { width: 100%; padding: 11px; font-size: 15px; margin-top: 4px; }
 
@@ -186,10 +193,11 @@ async function handleLogin() {
   align-items: center;
   gap: 6px;
   padding: 10px 12px;
-  background: #fef2f2;
+  background: var(--color-danger-light);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   font-size: 13px;
-  color: var(--color-danger);
+  color: var(--color-text);
 }
 
 .login-footer {
@@ -199,7 +207,7 @@ async function handleLogin() {
   margin-top: 20px;
 }
 .login-footer a {
-  color: var(--color-accent);
+  color: var(--color-primary);
   text-decoration: none;
   font-weight: 500;
 }

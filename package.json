@@ -8,6 +8,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "nprogress": "^0.2.0",
+    "pinia": "^3.0.4",
+    "three": "^0.184.0",
     "vue": "^3.4.0",
     "vue-router": "^4.2.0"
   },
