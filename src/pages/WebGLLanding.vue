@@ -8,10 +8,17 @@
     <header class="masthead">
       <div class="masthead-section left">
         <div class="logo-wrapper">
-          <div class="css-logo-shape-1">
-            <div class="shape-circle"></div>
-            <div class="shape-square"></div>
-          </div>
+          <svg class="brand-logo-svg" viewBox="0 0 100 100">
+            <!-- Crescent Moon -->
+            <path class="logo-path" d="M20,15 A10,10 0 1,1 20,35 A8,8 0 1,0 20,15" />
+            <!-- Concentric Arcs -->
+            <path class="logo-path stroke" d="M15,80 A35,35 0 0,1 85,80" />
+            <path class="logo-path stroke" d="M25,80 A25,25 0 0,1 75,80" />
+            <path class="logo-path stroke" d="M35,80 A15,15 0 0,1 65,80" />
+            <!-- Envelope -->
+            <rect class="logo-path stroke" x="42" y="70" width="16" height="10" rx="1" />
+            <path class="logo-path stroke" d="M42,70 L50,76 L58,70" />
+          </svg>
           <span class="logo-text">CAMPUS WALL</span>
         </div>
         <button class="nav-btn" @click="openMenu('explore')">Explore</button>
@@ -342,8 +349,8 @@ onUnmounted(() => {
 
 /* 白天模式覆盖 */
 :deep([data-theme="light"]) .editorial-landing,
-.editorial-landing.light-mode {
-  --bg-color: #F5F2EB;
+.editorial-landing.theme-light {
+  --bg-color: #F5F2EB; /* 恢复原来的米白色 */
   --text-color: #0D0D0D;
   --accent-color: #FF3333;
   --border-color: rgba(0, 0, 0, 0.1);
@@ -369,20 +376,23 @@ onUnmounted(() => {
 /* 强制 Logo 变成纯白色 */
 .img-inverted { filter: brightness(0) invert(1); } 
 
-.css-logo-shape-1 {
-  position: relative; width: 32px; height: 32px;
+.brand-logo-svg {
+  width: 32px; height: 32px;
   margin-right: 12px;
+  color: var(--text-color);
+  transition: color 0.5s;
 }
-.shape-circle {
-  position: absolute; top: 0; left: 0; width: 22px; height: 22px;
-  background: var(--accent-color); border-radius: 50%; mix-blend-mode: multiply; z-index: 2;
+
+.logo-path {
+  fill: currentColor;
 }
-.theme-dark .shape-circle {
-  mix-blend-mode: screen;
-}
-.shape-square {
-  position: absolute; bottom: 0; right: 0; width: 22px; height: 22px;
-  border: 2px solid var(--text-color); z-index: 1;
+
+.logo-path.stroke {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .logo-text {
@@ -390,6 +400,7 @@ onUnmounted(() => {
   font-size: 20px;
   letter-spacing: 0.05em;
   color: var(--text-color);
+  transition: color 0.5s;
 }
 
 .css-logo-shape-2 {
