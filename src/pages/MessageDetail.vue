@@ -1,5 +1,5 @@
 <template>
-  <div class="detail-page" data-page="app">
+  <div class="detail-page">
     <div class="container">
       <div class="detail-nav">
         <button class="back-btn" @click="smartBack()"><Icons name="back" :size="20" /></button>

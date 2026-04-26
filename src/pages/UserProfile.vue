@@ -1,10 +1,19 @@
 <template>
-  <div class="profile-page" data-page="app">
+  <div class="profile-page">
     <div class="container">
       <!-- 返回按钮 -->
       <div class="profile-back">
-        <button class="back-btn" @click="smartBack()"><Icons name="back" :size="20" /></button>
-        <span class="back-title">{{ isOwn ? '我的主页' : '个人主页' }}</span>
+        <div class="left-actions">
+          <button class="back-btn" @click="smartBack()"><Icons name="back" :size="20" /></button>
+          <span class="back-title">{{ isOwn ? '我的主页' : '个人主页' }}</span>
+        </div>
+        <div class="right-actions" v-if="isOwn">
+          <button class="action-btn theme-toggle" @click="themeStore?.toggleTheme" :title="themeStore?.theme === 'light' ? '暗色模式' : '亮色模式'">
+            <Icons :name="themeStore?.theme === 'dark' ? 'sun' : 'moon'" :size="18" />
+          </button>
+          <button v-if="userStore?.isLoggedIn" class="btn btn-secondary btn-sm" @click="handleLogout">退出</button>
+          <router-link v-else to="/login" class="btn btn-primary btn-sm">登录</router-link>
+        </div>
       </div>
 
       <div class="profile-card">
@@ -142,7 +151,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { usePostsStore, useUserStore } from '../stores'
+import { usePostsStore, useUserStore, useThemeStore } from '../stores'
 import { smartBack } from '../router'
 import Icons from '../components/Icons.vue'
 import PostCard from '../components/PostCard.vue'
@@ -151,9 +160,15 @@ const route = useRoute()
 const router = useRouter()
 const postsStore = usePostsStore()
 const userStore = useUserStore()
+const themeStore = useThemeStore()
 
 const isOwn = ref(!route.params.id)
 const isFollowing = ref(false)
+
+function handleLogout() {
+  userStore.logout()
+  router.push('/')
+}
 const showEditModal = ref(false)
 const avatarInput = ref(null)
 const coverInput = ref(null)
@@ -321,7 +336,11 @@ function toggleFollow() { isFollowing.value = !isFollowing.value }
 
 <style scoped>
 .profile-page { min-height: 100vh; padding: 16px 0 40px; }
-.profile-back { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.profile-back { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.left-actions { display: flex; align-items: center; gap: 12px; }
+.right-actions { display: flex; align-items: center; gap: 8px; }
+.action-btn { width: 36px; height: 36px; border-radius: var(--radius-full); background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--color-text-secondary); transition: all var(--transition-fast); }
+.action-btn:hover { background: var(--color-surface-alt); color: var(--color-text); }
 .back-btn { width: 36px; height: 36px; border-radius: var(--radius-full); background: var(--color-surface); border: 1px solid var(--color-border); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--color-text); transition: all var(--transition-fast); }
 .back-btn:hover { background: var(--color-surface-alt); }
 .back-title { font-size: 16px; font-weight: 600; color: var(--color-text); }

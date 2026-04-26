@@ -308,9 +308,43 @@ function handleKeydown(e) {
   }
 }
 
+let touchStartY = 0
+let touchEndY = 0
+
+function handleTouchStart(e) {
+  if (isAnimating || activeMenu.value) return
+  touchStartY = e.touches[0].clientY
+}
+
+function handleTouchEnd(e) {
+  if (isAnimating || activeMenu.value) return
+  touchEndY = e.changedTouches[0].clientY
+  
+  const activeSection = document.getElementById(`page-${currentPage.value}`)
+  if (!activeSection) return
+
+  const { scrollTop, scrollHeight, clientHeight } = activeSection
+  const atBottom = Math.ceil(scrollTop + clientHeight) >= scrollHeight - 5 
+  const atTop = scrollTop <= 5
+
+  const swipeDistance = touchStartY - touchEndY
+
+  if (swipeDistance > 50) { // Swipe up (scroll down)
+    if (atBottom && currentPage.value < maxPages - 1) {
+      changePage(currentPage.value + 1, 'down')
+    }
+  } else if (swipeDistance < -50) { // Swipe down (scroll up)
+    if (atTop && currentPage.value > 0) {
+      changePage(currentPage.value - 1, 'up')
+    }
+  }
+}
+
 onMounted(() => {
   if (landingRef.value) {
     landingRef.value.addEventListener('wheel', handleWheel, { passive: false })
+    landingRef.value.addEventListener('touchstart', handleTouchStart, { passive: true })
+    landingRef.value.addEventListener('touchend', handleTouchEnd, { passive: true })
     window.addEventListener('keydown', handleKeydown, { passive: false })
   }
 })
@@ -318,6 +352,8 @@ onMounted(() => {
 onUnmounted(() => {
   if (landingRef.value) {
     landingRef.value.removeEventListener('wheel', handleWheel)
+    landingRef.value.removeEventListener('touchstart', handleTouchStart)
+    landingRef.value.removeEventListener('touchend', handleTouchEnd)
   }
   window.removeEventListener('keydown', handleKeydown)
 })
@@ -656,4 +692,31 @@ button:focus, a:focus { outline: none !important; }
 .profile-info { display: flex; gap: 24px; align-items: center; margin-bottom: 32px; color: var(--text-color); }
 .info-text h3 { font-size: 20px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 4px; }
 .info-text p { font-size: 13px; color: var(--text-color); opacity: 0.5; font-family: 'Space Mono', monospace; }
+
+@media (max-width: 768px) {
+  .hero-screen { padding: 0 5vw; }
+  .massive-title { font-size: clamp(60px, 20vw, 120px); }
+  .anim-text-2 { margin-left: 10vw !important; margin-top: -20px !important; }
+  .hero-actions { margin-top: 20px; margin-left: 0; }
+  .hero-image-overlay { width: 70vw; height: 50vh; right: 5vw; top: 20vh; }
+  
+  .editorial-spread { flex-direction: column; padding: 10vh 5vw; }
+  .spread-left { width: 100%; padding-left: 0; margin-bottom: 40px; }
+  .spread-subtitle { font-size: 50px; }
+  .spread-right { width: 100%; height: 50vh; }
+  
+  .collage-layout { flex-direction: column; padding: 10vh 5vw; }
+  .collage-text { width: 100%; margin-bottom: 40px; }
+  .section-title { font-size: 60px; margin-bottom: 5vh; }
+  .collage-gallery { width: 100%; }
+  
+  .footer-cta-text { font-size: 32px; }
+  .btn-giant-elegant { padding: 16px 32px; font-size: 16px; }
+  .footer-links { flex-direction: column; gap: 20px; margin-top: 60px; align-items: center; }
+  
+  .masthead { padding: 0 10px; }
+  .nav-btn { padding: 0 16px; font-size: 12px; }
+  .logo-text { display: none; }
+  .logo-wrapper { min-width: auto; padding: 0 10px; }
+}
 </style>

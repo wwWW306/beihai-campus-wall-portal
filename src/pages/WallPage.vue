@@ -1,5 +1,5 @@
 <template>
-  <div class="wall-page" data-page="app">
+  <div class="wall-page">
     <AppNavBar />
     <div class="wall-container">
       

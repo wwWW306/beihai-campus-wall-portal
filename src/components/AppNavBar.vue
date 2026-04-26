@@ -303,6 +303,7 @@ function handleLogout() {
 }
 
 @media (max-width: 768px) {
+  .navbar { display: none; }
   .desktop-only { display: none; }
   .mobile-menu-btn { display: flex; }
   .navbar-actions .action-btn:not(.mobile-menu-btn):not(.theme-toggle) { display: none; }

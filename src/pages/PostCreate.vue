@@ -1,5 +1,5 @@
 <template>
-  <div class="create-page" data-page="app">
+  <div class="create-page">
     <div class="container">
       <div class="create-card">
         <div class="create-header">

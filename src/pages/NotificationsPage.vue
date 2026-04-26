@@ -1,5 +1,5 @@
 <template>
-  <div class="notif-page" data-page="app">
+  <div class="notif-page">
     <div class="container">
       <div class="notif-wrapper">
         <div class="notif-header">
