@@ -52,8 +52,7 @@ function isActive(path) {
   left: 0;
   right: 0;
   z-index: 1000;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
+  background: var(--color-surface);
   border-top: 1px solid var(--color-border);
   padding: 8px 0;
   padding-bottom: max(8px, env(safe-area-inset-bottom));
@@ -89,7 +88,7 @@ function isActive(path) {
   height: 8px;
   background: var(--color-primary);
   border-radius: 50%;
-  border: 2px solid #fff;
+  border: 2px solid var(--color-surface);
 }
 
 .tab-avatar {
