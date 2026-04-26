@@ -181,7 +181,7 @@ watch(() => route.query.sort, () => { loadInitial() })
 .no-more-text { font-weight: 500; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (max-width: 768px) { 
-  .partition-page { padding-top: 0; }
+  .partition-page { padding-top: calc(env(safe-area-inset-top, 0px) + 16px); }
   .partition-layout { grid-template-columns: 1fr; gap: 12px; } 
   .partition-sidebar { display: none; } 
   .page-header { padding: 12px; margin-bottom: 0; }

@@ -401,7 +401,7 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .wall-page { padding-top: env(safe-area-inset-top, 0px); }
+  .wall-page { padding-top: calc(env(safe-area-inset-top, 0px) + 16px); }
   .sidebar-left { display: none; }
   .wall-container { padding: 0; }
   .feed-container { width: 100%; border: none; padding: 0; }
