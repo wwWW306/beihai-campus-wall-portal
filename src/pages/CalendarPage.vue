@@ -1,5 +1,5 @@
 <template>
-  <div class="calendar-page">
+  <div class="calendar-page" data-page="app">
     <div class="page-header">
       <button class="back-btn" @click="goBack">
         <Icons name="arrow-left" :size="24" />

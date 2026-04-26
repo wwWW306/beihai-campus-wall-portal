@@ -1,5 +1,5 @@
 <template>
-  <div class="partition-page">
+  <div class="partition-page" data-page="app">
     <div class="container">
       <div class="page-header">
         <button class="back-btn" @click="smartBack()"><Icons name="back" :size="20" /></button>

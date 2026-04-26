@@ -1,5 +1,5 @@
 <template>
-  <div class="profile-page">
+  <div class="profile-page" data-page="app">
     <div class="container">
       <!-- 返回按钮 -->
       <div class="profile-back">

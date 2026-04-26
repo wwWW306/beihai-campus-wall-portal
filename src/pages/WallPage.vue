@@ -1,5 +1,6 @@
 <template>
-  <div class="wall-page">
+  <div class="wall-page" data-page="app">
+    <AppNavBar />
     <div class="wall-container">
       
       <!-- 左侧主导航 (完全独立列) -->
@@ -376,7 +377,29 @@ onMounted(() => {
 .side-footer a { color: inherit; text-decoration: none; transition: opacity 0.2s; }
 .side-footer a:hover { opacity: 0.7; }
 
-/* 响应式 */
-@media (max-width: 992px) { .sidebar-right { display: none; } }
-@media (max-width: 640px) { .sidebar-left { display: none; } .wall-container { padding: 0 12px; } }
+/* 响应式优化 */
+@media (max-width: 1200px) {
+  .wall-container { padding: 0 16px; }
+  .sidebar-right { width: 300px; }
+}
+
+@media (max-width: 1024px) {
+  .sidebar-right { display: none; } /* 平板端隐藏右侧，保证中栏和左栏空间 */
+  .feed-container { border-right: none; }
+}
+
+@media (max-width: 768px) {
+  .wall-page { padding-top: 64px; }
+  .sidebar-left { display: none; }
+  .wall-container { padding: 0; }
+  .feed-container { width: 100%; border: none; }
+  .column-content { padding: 12px; }
+  
+  /* 移动端减小卡片间距 */
+  .feed-container .column-content { gap: 12px; }
+}
+
+@media (max-width: 480px) {
+  .column-content { padding: 8px; }
+}
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="search-page">
+  <div class="search-page" data-page="app">
     <div class="container">
       <div class="search-header">
         <button class="back-btn" @click="handleBack"><Icons name="back" :size="20" /></button>

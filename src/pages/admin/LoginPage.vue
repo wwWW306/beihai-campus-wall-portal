@@ -1,5 +1,5 @@
 <template>
-  <div class="login-page">
+  <div class="login-page" data-page="app">
     <div class="login-card card">
       <!-- Logo -->
       <div class="login-logo">
