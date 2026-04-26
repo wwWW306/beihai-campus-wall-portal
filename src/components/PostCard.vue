@@ -96,4 +96,13 @@ function formatTime(ts) {
 .action-btn:hover { background: rgba(0, 0, 0, 0.04); color: var(--color-text-secondary); }
 .action-btn--liked { color: var(--color-primary); }
 .action-btn--liked:hover { background: var(--color-danger-light); color: var(--color-danger); }
+
+@media (max-width: 480px) {
+  .post-card {
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+    padding: 12px;
+  }
+}
 </style>

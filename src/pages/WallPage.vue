@@ -393,13 +393,13 @@ onMounted(() => {
   .sidebar-left { display: none; }
   .wall-container { padding: 0; }
   .feed-container { width: 100%; border: none; }
-  .column-content { padding: 12px; }
+  .column-content { padding: 0; }
   
   /* 移动端减小卡片间距 */
-  .feed-container .column-content { gap: 12px; }
+  .feed-container .column-content { gap: 8px; }
 }
 
 @media (max-width: 480px) {
-  .column-content { padding: 8px; }
+  .column-content { padding: 0; }
 }
 </style>
