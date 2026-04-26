@@ -45,7 +45,7 @@
                 v-for="tab in tabs" 
                 :key="tab.key" 
                 class="tab-btn" 
-                :class="{ 'tab-btn--active': activeTab === tab.key }" 
+                :class="{ 'tab-btn--active': activeTab === tab.key, 'mobile-only-tab': tab.mobileOnly }" 
                 @click="setTab(tab.key)"
               >
                 {{ tab.label }}
@@ -194,6 +194,8 @@ const tabs = [
   { key: 'hot', label: '热门', icon: 'fire' },
   { key: 'new', label: '最新', icon: 'clock' },
   { key: 'follow', label: '关注', icon: 'star' },
+  { key: 'partitions', label: '分区', mobileOnly: true },
+  { key: 'theme', label: '主题墙', mobileOnly: true }
 ]
 
 const hotSearch = [
@@ -211,6 +213,14 @@ const recommendedUsers = [
 ]
 
 function setTab(key) {
+  if (key === 'partitions') {
+    router.push('/partitions')
+    return
+  }
+  if (key === 'theme') {
+    router.push('/partitions/theme-wall')
+    return
+  }
   activeTab.value = key
   loadInitial()
 }
@@ -305,10 +315,12 @@ onMounted(() => {
   border-bottom: 1px solid var(--color-border);
 }
 
-.tab-group { display: flex; gap: 32px; }
-.tab-btn { background: transparent; border: none; font-size: 16px; font-weight: 700; color: var(--color-text-muted); cursor: pointer; position: relative; padding-bottom: 8px; }
+.tab-group { display: flex; gap: 32px; overflow-x: auto; scrollbar-width: none; }
+.tab-group::-webkit-scrollbar { display: none; }
+.tab-btn { flex-shrink: 0; white-space: nowrap; background: transparent; border: none; font-size: 16px; font-weight: 700; color: var(--color-text-muted); cursor: pointer; position: relative; padding-bottom: 8px; }
 .tab-btn--active { color: var(--color-primary); }
 .tab-indicator { position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--color-primary); border-radius: 2px; }
+.mobile-only-tab { display: none; }
 
 .feed-content { display: flex; flex-direction: column; gap: 24px; padding-bottom: 80px; }
 
@@ -389,10 +401,13 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .wall-page { padding-top: 64px; }
+  .wall-page { padding-top: env(safe-area-inset-top, 0px); }
   .sidebar-left { display: none; }
   .wall-container { padding: 0; }
-  .feed-container { width: 100%; border: none; }
+  .feed-container { width: 100%; border: none; padding: 0; }
+  .feed-header { padding: 0 12px 16px 12px; margin-bottom: 8px; }
+  .tab-group { gap: 20px; }
+  .mobile-only-tab { display: inline-block; }
   .column-content { padding: 0; }
   
   /* 移动端减小卡片间距 */

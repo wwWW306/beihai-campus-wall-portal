@@ -97,7 +97,7 @@ function formatTime(ts) {
 .action-btn--liked { color: var(--color-primary); }
 .action-btn--liked:hover { background: var(--color-danger-light); color: var(--color-danger); }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .post-card {
     border-left: none;
     border-right: none;

@@ -180,5 +180,12 @@ watch(() => route.query.sort, () => { loadInitial() })
 .spinner-small { width: 16px; height: 16px; border: 2px solid var(--color-border); border-top-color: var(--color-primary); border-radius: 50%; animation: spin 1s linear infinite; }
 .no-more-text { font-weight: 500; }
 @keyframes spin { to { transform: rotate(360deg); } }
-@media (max-width: 768px) { .partition-layout { grid-template-columns: 1fr; } .partition-sidebar { display: none; } }
+@media (max-width: 768px) { 
+  .partition-page { padding-top: 0; }
+  .partition-layout { grid-template-columns: 1fr; gap: 12px; } 
+  .partition-sidebar { display: none; } 
+  .page-header { padding: 12px; margin-bottom: 0; }
+  .filter-bar { padding: 0 12px; }
+  .post-list { gap: 8px; }
+}
 </style>
